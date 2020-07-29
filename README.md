@@ -39,3 +39,5 @@
  ![tightvnc](https://images.gitee.com/uploads/images/2020/0729/233338_b7c4ea18_7423713.png "屏幕截图.png")
 
  ![ctrl](https://images.gitee.com/uploads/images/2020/0729/233402_1190aa4d_7423713.png "屏幕截图.png")
+
+ ![package](https://images.gitee.com/uploads/images/2020/0729/235415_fd76485a_7423713.png "屏幕截图.png")
