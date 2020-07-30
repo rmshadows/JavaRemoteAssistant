@@ -1,8 +1,18 @@
  # Java Remote Assistant远程协作助手
 
+ - 开源、免费的远程协助工具TightVNC是个很棒的选择，但远程协助受控方一般是电脑小白，搭建TightVNC Server可能对他们来说有点困难。于是我写了这个JRA助手帮我更方便的协助小白朋友处理电脑的一些小问题。
+
+ #### 连接过程：
+
+       * 控制方：向对方发送JRA压缩包。搭建内网穿透，打开VNC_Viewer监听模式，告诉小白 **远程地址** ，等待逆向连接。
+
+       * 被控方：解压JRA，双击JRA.exe运行。点击加载远程桌面，在询问窗口中输入 **远程地址** ，等待大白(。。？)连接成功。
+
+       * 注意：记得告诉小白，要给予JRA运行权限，UAC要同意，防火墙也要同意（直接跟小白说有弹窗全同意、确认就是了）。
+
  - 当前版本：3.0
  
- 基于[TightVNC](https://www.tightvnc.com/)（JRA是受控端，控制端请到TightVNC官网下载Viewer，当然，其他VNC Viewer也行），可以用[Auto Hot Key](https://www.autohotkey.com/)脚本自定义按键等。Java Remote Assistant主要是帮助我更方便的使用TightVNC和朋友进行远程协作。因为Teamviewer有时会误判我商业用途，导致我一段时间用不了，破解版我不知道为啥，我的电脑用不了，一直显示未知原因，正版报价太贵，我也就每个月用个十次估计，帮朋友弄弄电脑啥的，划不来（AnyDesk也不错，但连接不稳定，速度慢）。所以采用VNC咯，但VNC没有加密，我是建议弄个VPN或者SSH隧道，这样比较安全。这个玩意儿匆忙写的，bug肯定有，优化不好，但能用就是。
+ 基于[TightVNC](https://www.tightvnc.com/)（JRA是受控端，控制端请到TightVNC官网下载Viewer，当然，其他VNC Viewer也行），可以用[Auto Hot Key](https://www.autohotkey.com/)脚本自定义按键等。Java Remote Assistant主要是帮助我更方便的使用TightVNC和朋友进行远程协作。因为Teamviewer有时会误判我商业用途，导致我一段时间用不了，破解版我不知道为啥，我的电脑用不了，一直显示未知原因，正版报价太贵，我也就每个月用个十次估计，帮朋友弄弄电脑啥的，划不来（AnyDesk也不错，但连接不稳定，速度慢）。所以采用VNC咯， **但VNC没有加密** ，我是 **建议弄个VPN或者SSH隧道** ，这样比较安全。这个玩意儿匆忙写的，bug肯定有，优化不好，但能用就是。
 
  -  ~~**注意：** TightVNC在 _**Windows的UAC**_ 下会闪退，断开连接，我也不懂，对吧……所以记得有UAC的，电话联系下对方。。帮忙点个确认，或者关闭UAC（不推荐）。~~【已解决，3.0及以上版本采用服务方式入驻，解决app模式的UAC地雷问题】
 
