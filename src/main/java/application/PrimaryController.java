@@ -34,6 +34,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.robot.Robot;
 
 public class PrimaryController implements Initializable {
+	private static String defaultRemoteHostAddress = "8.8.8.8:6666";
 	// 用于停止执行VNC服务的启动
 	private final static String EXIT_CODE = "ERROR";
 	private static Robot robot = new Robot();
@@ -49,9 +50,8 @@ public class PrimaryController implements Initializable {
 	private static Button sShiftLock = new Button();
 	private static Button sAltLock = new Button();
 	private static Button sWinLock = new Button();
-	private static int DelaySecond = 15;//已失效！修改为左键5s、右键10s、滚轮按键20s
+	private static int DelaySecond = 15;// 已失效！修改为左键5s、右键10s、滚轮按键20s
 	private static boolean flag = true;
-
 
 	@FXML
 	private VBox vb;
@@ -125,12 +125,14 @@ public class PrimaryController implements Initializable {
 		// 输入远程主机地址的对话框
 		System.out.println("是否自定义远程主机地址？");
 		final String RemoteHost = showInputDialog(
-				"询问：请输入远程主机地址。如没有，请留空(一般是留空,直接回车就是)。\n" + "随后的防火墙联网许可、UAC管理员权限请求【请选择>允许<】谢谢！",
-				"8.8.8.8:666");
+				"询问：请输入远程主机地址。如没有，请留空(一般是留空,直接回车就是)。\n"
+		+ "随后的防火墙联网许可、UAC管理员权限请求【请选择>允许<】谢谢！",defaultRemoteHostAddress);
 		// 判断是否需要停止执行
 		if (RemoteHost.equals(EXIT_CODE)) {
 			System.out.println("无效参数,启动远程桌面失败。");
-		} else if (isVNCon()) {
+		}
+		//如果VNC已经运行，直接连接
+		else if (isVNCon()) {
 			Process cmd;
 			String cmd_run = "";
 
@@ -139,8 +141,10 @@ public class PrimaryController implements Initializable {
 			String exit = "";// 退出执行状态码
 
 			try {
+				System.out.println("====>>>>VNC已运行，正在重连<<<<====");
 				System.out.println("VNC is running.");
-				String Connect = ".\\bin\\server\\RAServer\\start_server.exe -controlapp -connect " + RemoteHost;
+//				String Connect = ".\\bin\\server\\RAServer\\start_server.exe -controlapp -connect " + RemoteHost;
+				String Connect = ".\\bin\\server\\RAServer\\start_server.exe -controlservice -connect " + RemoteHost;
 				cmd_run = Connect;
 				cmd = Runtime.getRuntime().exec(cmd_run);
 
@@ -175,12 +179,13 @@ public class PrimaryController implements Initializable {
 				}
 				System.out.println("On connect return exit code:" + exit);
 			} catch (Exception e) {
-				// TODO: handle exception
+				System.out.println(e.toString());
 			}
-
+			App.setTop(true);
 		} else {
 			Process cmd;
 			final String cmd_str = "cmd.exe /C start ";
+			System.out.println(cmd_str);
 			String cmd_run = "";
 
 			String stat = "";// 正常输出流
@@ -188,8 +193,10 @@ public class PrimaryController implements Initializable {
 			String exit = "";// 退出执行状态码
 
 			try {
-				// 启动TightVNC
-				cmd_run = cmd_str + ".\\bin\\server\\RAServer\\server_launcher.vbs";
+				// 注册TightVNC
+				System.out.println("====>>>>启动VNC服务<<<<====");
+//				cmd_run = cmd_str + ".\\bin\\server\\RAServer\\server_launcher.vbs";
+				cmd_run = ".\\bin\\server\\RAServer\\start_server.exe -reinstall";
 				cmd = Runtime.getRuntime().exec(cmd_run);
 				InputStream IS = cmd.getInputStream();
 				InputStreamReader ISR = new InputStreamReader(IS, "gbk");
@@ -215,10 +222,49 @@ public class PrimaryController implements Initializable {
 					});
 					cmdError.show();
 				} else {
-					System.out.println("Cmd exec success on start.");
+					System.out.println("Cmd exec success on install.");
 				}
 				System.out.println("On start return exit code:" + exit);
-
+				Thread.sleep(1000);
+				
+				// 启动TightVNC
+				System.out.println("====>>>>启动VNC服务<<<<====");
+				cmd_run = ".\\bin\\server\\RAServer\\start_server.exe -start";
+				cmd = Runtime.getRuntime().exec(cmd_run);
+				line = null;
+				while ((line = BR0.readLine()) != null) {
+					stat = stat + line + "\n";
+					System.out.println(line);
+				}
+				while ((line = BR1.readLine()) != null) {
+					error = error + line + "\n";
+					System.out.println(line);
+				}
+				exitValue = cmd.waitFor();
+				exit = String.valueOf(exitValue);
+				if (exitValue != 0) {
+					Alert cmdError = new Alert(AlertType.WARNING);
+					cmdError.setContentText(error);
+					cmdError.setResizable(true);
+					cmdError.setOnHidden((DialogEvent) -> {
+						App.setTop(true);
+					});
+					cmdError.show();
+				} else {
+					System.out.println("Cmd exec success on start service.");
+				}
+				System.out.println("On start return exit code:" + exit);
+				Thread.sleep(1000);
+				// 如果VNC服务未运行，重新加载
+				if(!isVNCon()) {
+					try {
+						cmd_run = ".\\bin\\server\\RAServer\\start_server.exe -start";
+						cmd = Runtime.getRuntime().exec(cmd_run);
+					} catch (Exception e) {
+						System.err.println("二次加载"+e.toString());
+					}
+				}
+				
 				System.out.println("等待TightVNC初始化(2s)……");
 				stat = stat + "\n__________我只是一条分割线_________\n";
 				error = error + "\n__________我只是一条分割线_________\n";
@@ -230,6 +276,7 @@ public class PrimaryController implements Initializable {
 				// 只有上一步的启动VNC返回值是0才会进行连接。
 				if (exitValue == 0) {
 					// 检查VNC
+					System.out.println("====>>>>VNC服务启动程序正常加载<<<<====");
 					new Thread(new Runnable() {
 						@Override
 						public void run() {
@@ -248,8 +295,9 @@ public class PrimaryController implements Initializable {
 						isVNCon();
 					}
 					flag = true;
+					System.out.println("====>>>>检测到VNC服务启动<<<<====");
 					// 尝试逆向连接远程主机
-					String Connect = ".\\bin\\server\\RAServer\\start_server.exe -controlapp -connect " + RemoteHost;
+					String Connect = ".\\bin\\server\\RAServer\\start_server.exe -controlservice -connect " + RemoteHost;
 					cmd_run = Connect;
 					cmd = Runtime.getRuntime().exec(cmd_run);
 					IS = cmd.getInputStream();
@@ -275,11 +323,14 @@ public class PrimaryController implements Initializable {
 							App.setTop(true);
 						});
 						cmdError.show();
+						System.out.println("====>>>>VNC连接程序未正常加载<<<<====");
 					} else {
+						System.out.println("====>>>>连接操作完成<<<<====");
 						System.out.println("Cmd exec success on connect command.");
 					}
 					System.out.println("On connect return exit code:" + exit);
 				} else {
+					System.out.println("====>>>>VNC启动失败<<<<====");
 					System.out.println("在启动VNC时遇到了困难，未连接！");
 				}
 			} catch (Exception e) {
@@ -294,9 +345,11 @@ public class PrimaryController implements Initializable {
 			} finally {
 				System.out.println("Input Stream:" + stat);
 				System.out.println("Error Stream:" + error);
+				flag = true;
 				App.setTop(true);
 			}
 		}
+		System.out.println("\n\n====>>>>启动进程结束<<<<====\n\n");
 	}
 
 	/**
@@ -309,70 +362,36 @@ public class PrimaryController implements Initializable {
 		App.setTop(false);
 		Process cmd;
 		final String cmd_str = "cmd.exe /C start ";
+		System.out.println(cmd_str);
 		String cmd_run = "";
 
 		String stat = "";// 正常输出流
 		String error = "";// 错误输出流
 		String exit = "";// 退出执行状态码
-
-		try {
-			// 关闭TightVNC
-			cmd_run = ".\\bin\\server\\RAServer\\start_server.exe -controlapp -shutdown";
-			cmd = Runtime.getRuntime().exec(cmd_run);
-			BufferedReader BR0 = new BufferedReader(new InputStreamReader(cmd.getInputStream(), "gbk"));
-			BufferedReader BR1 = new BufferedReader(new InputStreamReader(cmd.getErrorStream(), "gbk"));
-			String line = null;
-			while ((line = BR0.readLine()) != null) {
-				stat = stat + line + "\n";
-				System.out.println(line);
-			}
-			while ((line = BR1.readLine()) != null) {
-				error = error + line + "\n";
-//				System.out.println(line);
-			}
-			int exitValue = cmd.waitFor();
-			exit = String.valueOf(exitValue);
-			if (exitValue != 0) {
-				System.out.println("On shutdown:" + error);
-//				Alert cmdError = new Alert(AlertType.WARNING);
-//				cmdError.setContentText(error);
-//				cmdError.setResizable(true);
-//				cmdError.setOnHidden((DialogEvent) -> {
-//					App.setTop(true);
-//				});
-//				cmdError.show();
-			} else {
-				System.out.println("Cmd exec success on shutdown.");
-			}
-			System.out.println("On shutdown return exit code:" + exit);
-
-			System.out.println("正在检测是否正常结束(2s)……");
-			stat = stat + "\n__________我是一条无情的分割线_________\n";
-			error = error + "\n__________我是一条无情的分割线_________\n";
-			BR0 = null;
-			BR1 = null;
-			Thread.sleep(2000);
-			// 上一步没有正常执行就主动杀死。
-			if (exitValue != 0) {
-//				String kill = "taskkill /f /t /im start_server.exe";
-				String kill = ".\\bin\\server\\RAServer\\kill_server.bat";
-				cmd_run = cmd_str + kill;
+		
+		//先检测VNC服务是否运行
+		if (isVNCon()) {
+			try {
+				// 关闭TightVNC
+				System.out.println("====>>>>开始关闭VNC进程<<<<====");
+//				cmd_run = ".\\bin\\server\\RAServer\\start_server.exe -controlapp -shutdown";
+				cmd_run = ".\\bin\\server\\RAServer\\start_server.exe -stop";
 				cmd = Runtime.getRuntime().exec(cmd_run);
-				BR0 = new BufferedReader(new InputStreamReader(cmd.getInputStream(), "gbk"));
-				BR1 = new BufferedReader(new InputStreamReader(cmd.getErrorStream(), "gbk"));
-				line = null;
+				BufferedReader BR0 = new BufferedReader(new InputStreamReader(cmd.getInputStream(), "gbk"));
+				BufferedReader BR1 = new BufferedReader(new InputStreamReader(cmd.getErrorStream(), "gbk"));
+				String line = null;
 				while ((line = BR0.readLine()) != null) {
 					stat = stat + line + "\n";
 					System.out.println(line);
 				}
 				while ((line = BR1.readLine()) != null) {
 					error = error + line + "\n";
-					System.out.println(line);
+//					System.out.println(line);
 				}
-				exitValue = cmd.waitFor();
+				int exitValue = cmd.waitFor();
 				exit = String.valueOf(exitValue);
 				if (exitValue != 0) {
-					System.out.println("On kill:" + error);
+					System.out.println("On shutdown:" + error);
 //					Alert cmdError = new Alert(AlertType.WARNING);
 //					cmdError.setContentText(error);
 //					cmdError.setResizable(true);
@@ -381,37 +400,153 @@ public class PrimaryController implements Initializable {
 //					});
 //					cmdError.show();
 				} else {
-					System.out.println("Cmd exec success on kill command.");
+					System.out.println("Cmd exec success on shutdown.");
 				}
-				System.out.println("On kill return exit code:" + exit);
-			} else {
-				System.out.println("一次检查");
-				// 检查
-				try {
-					cmd_run = "tasklist";
-					cmd = Runtime.getRuntime().exec(cmd_run);
-					BufferedReader readTask = new BufferedReader(new InputStreamReader(cmd.getInputStream(), "gbk"));
-					LinkedList<String> Tasks = new LinkedList<>();
-					boolean isFound = false;
-					// 遍历tasklist
-					while ((line = readTask.readLine()) != null) {
-						Tasks.add(line);
-						System.out.println(line);
-					}
-					for (String task : Tasks) { // 也可以改写 for(int i=0;i<list.size();i++) 这种形式
-						if (task.contains("start_server.exe")) {
-							isFound = true;
+				System.out.println("On shutdown return exit code:" + exit);
+
+				System.out.println("正在检测是否正常结束(2.5s)……");
+				stat = stat + "\n__________我是一条无情的分割线_________\n";
+				error = error + "\n__________我是一条无情的分割线_________\n";
+				BR0 = null;
+				BR1 = null;
+				Thread.sleep(2500);
+				// 上一步没有正常执行就主动杀死。
+				if (exitValue != 0) {
+					if(isVNCon()) {
+						try {
+							cmd_run = ".\\bin\\server\\RAServer\\start_server.exe -stop";
+							cmd = Runtime.getRuntime().exec(cmd_run);
+						} catch (Exception e) {
+							System.out.println("再次主动关闭错误："+e.toString());
 						}
 					}
-					if (isFound) {
-						System.out.println("发现残留进程");
-						cmd_run = cmd_str + ".\\bin\\server\\RAServer\\kill_server.bat";
+					Thread.sleep(2400);
+					if(isVNCon()) {
+						System.out.println("====>>>>主动关闭失败，尝试强制关闭<<<<====");
+//						String kill = "taskkill /f /t /im start_server.exe";
+						System.out.println("====>>>>一次强制关闭开始<<<<====");
+						String kill = ".\\bin\\server\\RAServer\\kill_server.bat";
+						cmd_run = kill;
 						cmd = Runtime.getRuntime().exec(cmd_run);
+						BR0 = new BufferedReader(new InputStreamReader(cmd.getInputStream(), "gbk"));
+						BR1 = new BufferedReader(new InputStreamReader(cmd.getErrorStream(), "gbk"));
+						line = null;
+						while ((line = BR0.readLine()) != null) {
+							stat = stat + line + "\n";
+							System.out.println(line);
+						}
+						while ((line = BR1.readLine()) != null) {
+							error = error + line + "\n";
+							System.out.println(line);
+						}
+						exitValue = cmd.waitFor();
+						exit = String.valueOf(exitValue);
+						if (exitValue != 0) {
+							System.out.println("On kill:" + error);
+//							Alert cmdError = new Alert(AlertType.WARNING);
+//							cmdError.setContentText(error);
+//							cmdError.setResizable(true);
+//							cmdError.setOnHidden((DialogEvent) -> {
+//								App.setTop(true);
+//							});
+//							cmdError.show();
+						} else {
+							System.out.println("Cmd exec success on kill command.");
+						}
+						System.out.println("On kill return exit code:" + exit);
+					}
+				} else {
+					System.out.println("一次检查");
+					if(isVNCon()) {
+						try {
+//							cmd_run = ".\\bin\\server\\RAServer\\start_server.exe -controlapp -shutdown";
+							cmd_run = ".\\bin\\server\\RAServer\\start_server.exe -stop";
+							cmd = Runtime.getRuntime().exec(cmd_run);
+							cmd.waitFor();
+						} catch (Exception e) {
+							System.out.println(e.toString());
+						}
+					}
+					// 再次检查
+					try {
+						cmd_run = "tasklist";
+						cmd = Runtime.getRuntime().exec(cmd_run);
+						BufferedReader readTask = new BufferedReader(
+								new InputStreamReader(cmd.getInputStream(), "gbk"));
+						LinkedList<String> Tasks = new LinkedList<>();
+						boolean isFound = false;
+						// 遍历tasklist
+						while ((line = readTask.readLine()) != null) {
+							Tasks.add(line);
+							System.out.println(line);
+						}
+						for (String task : Tasks) { // 也可以改写 for(int i=0;i<list.size();i++) 这种形式
+							if (task.contains("start_server.exe")) {
+								isFound = true;
+							}
+						}
+						if (isFound) {
+							System.out.println("发现残留进程");
+							System.out.println("====>>>>二次强制关闭<<<<====");
+							cmd_run = ".\\bin\\server\\RAServer\\kill_server.bat";
+							cmd = Runtime.getRuntime().exec(cmd_run);
+							exitValue = cmd.waitFor();
+						}
+					} catch (Exception e) {
+						// TODO: handle exception
+						Alert cmdError = new Alert(AlertType.WARNING);
+						cmdError.setContentText("未能停止远程桌面，请手动打开任务管理器(快捷键:Ctrl+Shift+Esc)\n"
+								+ "或者点击下方的“任务管理器”按钮。打开任务管理器后在“详细信息”中找\n" + "到“start_server.exe”，然后'右击'选择'结束任务'。");
+						cmdError.setResizable(true);
+						cmdError.setOnHidden((DialogEvent) -> {
+							App.setTop(true);
+						});
+						cmdError.show();
+						System.out.println("在杀死VNC时遇到了困难:" + e.toString());
+					}
+				}
+			} catch (Exception e) {
+				System.out.println("Java Exception :\n" + e.toString());
+				Alert javaError = new Alert(AlertType.ERROR);
+				javaError.setContentText("Java Exception :\n" + e.toString() + "\n\n" + "Error Stream:\n" + error);
+				javaError.setResizable(true);
+				javaError.setOnHidden((DialogEvent) -> {
+					App.setTop(true);
+				});
+				javaError.show();
+			} finally {
+				System.out.println("二次检查");
+				// 检查
+				try {
+//					cmd_run = "tasklist";
+//					cmd = Runtime.getRuntime().exec(cmd_run);
+//					BufferedReader readTask = new BufferedReader(new InputStreamReader(cmd.getInputStream(), "gbk"));
+//					LinkedList<String> Tasks = new LinkedList<>();
+//					boolean isFound = false;
+//					// 遍历tasklist
+//					String line = null;
+//					while ((line = readTask.readLine()) != null) {
+//						Tasks.add(line);
+//						System.out.println(line);
+//					}
+//					for (String task : Tasks) { // 也可以改写 for(int i=0;i<list.size();i++) 这种形式
+//						if (task.contains("start_server.exe")) {
+//							isFound = true;
+//						}
+//					}
+//					if (isFound) {
+					if (isVNCon()) {
+						System.out.println("发现残留进程");
+						System.out.println("====>>>>三次强制关闭<<<<====");
+						cmd_run = ".\\bin\\server\\RAServer\\kill_server.bat";
+						cmd = Runtime.getRuntime().exec(cmd_run);
+						cmd.wait();
+					}else {
+						System.out.println("二次检查未发现VNC进程");
 					}
 				} catch (Exception e) {
-					// TODO: handle exception
 					Alert cmdError = new Alert(AlertType.WARNING);
-					cmdError.setContentText("未能停止远程桌面，请手动打开任务管理器(快捷键:Ctrl+Shift+Esc)\n"
+					cmdError.setContentText("如果未能停止远程桌面，请手动打开任务管理器(快捷键:Ctrl+Shift+Esc)\n"
 							+ "或者点击下方的“任务管理器”按钮。打开任务管理器后在“详细信息”中找\n" + "到“start_server.exe”，然后'右击'选择'结束任务'。");
 					cmdError.setResizable(true);
 					cmdError.setOnHidden((DialogEvent) -> {
@@ -419,57 +554,42 @@ public class PrimaryController implements Initializable {
 					});
 					cmdError.show();
 					System.out.println("在杀死VNC时遇到了困难:" + e.toString());
+					App.setTop(true);
 				}
-			}
-		} catch (Exception e) {
-			System.out.println("Java Exception :\n" + e.toString());
-			Alert javaError = new Alert(AlertType.ERROR);
-			javaError.setContentText("Java Exception :\n" + e.toString() + "\n\n" + "Error Stream:\n" + error);
-			javaError.setResizable(true);
-			javaError.setOnHidden((DialogEvent) -> {
-				App.setTop(true);
-			});
-			javaError.show();
-		} finally {
-			System.out.println("二次检查");
-			// 检查
-			try {
-				cmd_run = "tasklist";
-				cmd = Runtime.getRuntime().exec(cmd_run);
-				BufferedReader readTask = new BufferedReader(new InputStreamReader(cmd.getInputStream(), "gbk"));
-				LinkedList<String> Tasks = new LinkedList<>();
-				boolean isFound = false;
-				// 遍历tasklist
-				String line = null;
-				while ((line = readTask.readLine()) != null) {
-					Tasks.add(line);
-					System.out.println(line);
-				}
-				for (String task : Tasks) { // 也可以改写 for(int i=0;i<list.size();i++) 这种形式
-					if (task.contains("start_server.exe")) {
-						isFound = true;
+				//尝试卸载服务
+				try {
+					cmd_run = ".\\bin\\server\\RAServer\\start_server.exe -remove";
+					cmd = Runtime.getRuntime().exec(cmd_run);
+					cmd.waitFor();
+				} catch (Exception e2) {
+					System.err.println("\n\n卸载服务出错！ -- "+ e2.toString());
+					try {
+						if(isVNCon()) {
+							cmd_run = ".\\bin\\server\\RAServer\\start_server.exe -stop";
+							cmd = Runtime.getRuntime().exec(cmd_run);
+							cmd.waitFor();
+						}
+						cmd_run = ".\\bin\\server\\RAServer\\start_server.exe -remove";
+						cmd = Runtime.getRuntime().exec(cmd_run);
+						cmd.wait();
+					} catch (Exception e3) {
+						System.out.println("二次卸载服务出错，停止尝试。"
+								+ "请进入bin/server/RAServer/目录，手动在powershell或者cmd中输入“start_server.exe -remove”卸载。");
+						App.setTop(true);
 					}
 				}
-				if (isFound) {
-					System.out.println("发现残留进程");
-					cmd_run = cmd_str + ".\\bin\\server\\RAServer\\kill_server.bat";
-					cmd = Runtime.getRuntime().exec(cmd_run);
-				}
-			} catch (Exception e) {
-				Alert cmdError = new Alert(AlertType.WARNING);
-				cmdError.setContentText("未能停止远程桌面，请手动打开任务管理器(快捷键:Ctrl+Shift+Esc)\n"
-						+ "或者点击下方的“任务管理器”按钮。打开任务管理器后在“详细信息”中找\n" + "到“start_server.exe”，然后'右击'选择'结束任务'。");
-				cmdError.setResizable(true);
-				cmdError.setOnHidden((DialogEvent) -> {
-					App.setTop(true);
-				});
-				cmdError.show();
-				System.out.println("在杀死VNC时遇到了困难:" + e.toString());
+				
+				System.out.println("Input Stream:" + stat);
+				System.out.println("Error Stream:" + error);
+				App.setTop(true);
 			}
-			System.out.println("Input Stream:" + stat);
-			System.out.println("Error Stream:" + error);
+		}
+		else {
+			System.out.println("====>>>>未检出到VNC服务进程，不进行关闭操作<<<<====");
 			App.setTop(true);
 		}
+		App.setTop(true);
+		System.out.println("\n\n====>>>>停止进程结束<<<<====\n\n");
 	}
 
 	@FXML
@@ -570,19 +690,16 @@ public class PrimaryController implements Initializable {
 
 	@FXML
 	void ahks(MouseEvent event) {
-		if(event.getButton() == MouseButton.PRIMARY){
+		if (event.getButton() == MouseButton.PRIMARY) {
 			DelaySecond = 5;
-		}
-		else if(event.getButton() == MouseButton.SECONDARY) {
+		} else if (event.getButton() == MouseButton.SECONDARY) {
 			DelaySecond = 10;
-		}
-		else if(event.getButton() == MouseButton.MIDDLE) {
+		} else if (event.getButton() == MouseButton.MIDDLE) {
 			DelaySecond = 20;
-		}
-		else {
+		} else {
 			System.out.println(DelaySecond);
 		}
-		final String filename = showInputDialog("请输入ahk文件名：","sample");
+		final String filename = showInputDialog("请输入ahk文件名：", "sample");
 		if (filename.equals(EXIT_CODE)) {
 			System.out.println("无效参数");
 			return;
@@ -629,7 +746,7 @@ public class PrimaryController implements Initializable {
 
 		vb.getStyleClass().add("bgm");
 		info.getStyleClass().add("font");
-		if(!App.start_up) {
+		if (!App.start_up) {
 			try {
 				getIP();
 			} catch (SocketException e1) {
@@ -834,8 +951,8 @@ public class PrimaryController implements Initializable {
 	}
 
 	/**
-	 * 倒计时执行auto hot key 2.0
-	 * 注意：中途无法取消！
+	 * 倒计时执行auto hot key 2.0 注意：中途无法取消！
+	 * 
 	 * @author Ryan Yim
 	 *
 	 */
@@ -868,9 +985,9 @@ public class PrimaryController implements Initializable {
 					System.out.println("Time up,do.");
 					try {
 						Process cmd;
-						String cmd_run = ".\\bin\\AHK.exe "+ filename +".ahk";
+						String cmd_run = ".\\bin\\AHK.exe " + filename + ".ahk";
 						cmd = Runtime.getRuntime().exec(cmd_run);
-						System.out.println("AHK执行结果："+cmd.waitFor());
+						System.out.println("AHK执行结果：" + cmd.waitFor());
 					} catch (Exception e) {
 						System.err.println(e.toString());
 					}

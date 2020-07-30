@@ -14,7 +14,8 @@ import javafx.scene.robot.Robot;
 import javafx.stage.Stage;
 
 /**
- * 主程序入口 JavaFX App Package:mvn clean javafx:jlink
+ * 主程序入口 JavaFX App
+ * Package:mvn clean javafx:jlink
  */
 public class App extends Application {
 	private static Stage sstage;
@@ -26,7 +27,7 @@ public class App extends Application {
 	public void start(Stage stage) throws IOException {
 		System.out.println("欢迎使用Java Remote Assistant远程协助助手。");
 		System.out.println("Ryan Yim -2020-07-29-");
-		System.out.println("版本：2.0");
+		System.out.println("版本：3.0");
 		System.out.println("\n\n正在初始化……");
 		sstage = stage;
 		scene = new Scene(loadFXML("primary"));
