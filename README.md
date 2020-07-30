@@ -62,4 +62,4 @@
 
  # 感谢
 
- 感谢[ **TightVNC** ](https://www.tightvnc.com/) 和 [ **TigerVNC** ](https://tigervnc.org/) 作者们的辛勤劳作，很棒的项目，特别是TightVNC的逆向连接简直妙极了哈哈哈哈哈哈。Windows这边我优先使用TightVNC，Linux平台我优先使用TigerVNC，都是很棒的项目，再次感谢！
+ 感谢[ **TightVNC** ](https://www.tightvnc.com/) 和 [ **TigerVNC** ](https://tigervnc.org/) 作者们的辛勤劳作，很棒的项目，特别是逆向连接简直妙极了哈哈哈哈哈哈。Windows这边我优先使用TightVNC，Linux平台我优先使用TigerVNC，都是很棒的项目，再次感谢！
