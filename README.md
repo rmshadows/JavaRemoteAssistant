@@ -10,7 +10,7 @@
 
        * 注意：记得告诉小白，要给予JRA运行权限，UAC要同意，防火墙也要同意（直接跟小白说有弹窗全同意、确认就是了）。
 
- - 当前版本：3.0
+ - 当前版本：4.1
  
  基于[TightVNC](https://www.tightvnc.com/)（JRA是受控端，控制端请到TightVNC官网下载Viewer，当然，其他VNC Viewer也行），可以用[Auto Hot Key](https://www.autohotkey.com/)脚本自定义按键等。Java Remote Assistant主要是帮助我更方便的使用TightVNC和朋友进行远程协作。因为Teamviewer有时会误判我商业用途，导致我一段时间用不了，破解版我不知道为啥，我的电脑用不了，一直显示未知原因，正版报价太贵，我也就每个月用个十次估计，帮朋友弄弄电脑啥的，划不来（AnyDesk也不错，但连接不稳定，速度慢）。所以采用VNC咯， **但VNC没有加密** ，我是 **建议弄个VPN或者SSH隧道** ，这样比较安全。这个玩意儿匆忙写的，bug肯定有，优化不好，但能用就是。
 
