@@ -44,6 +44,8 @@
 
  ![main](https://images.gitee.com/uploads/images/2020/0729/233054_b5721a6a_7423713.png "屏幕截图.png")
 
+ ![systray](https://images.gitee.com/uploads/images/2020/0804/234445_f0f3b8df_7423713.png "屏幕截图.png")
+
  ![it works！](https://images.gitee.com/uploads/images/2020/0730/100116_eb6e316d_7423713.png "屏幕截图.png")
 
  ![UAC](https://images.gitee.com/uploads/images/2020/0730/100034_18b32f14_7423713.png "屏幕截图.png")
@@ -59,6 +61,8 @@
  ![ctrl](https://images.gitee.com/uploads/images/2020/0729/233402_1190aa4d_7423713.png "屏幕截图.png")
 
  ![package](https://images.gitee.com/uploads/images/2020/0729/235415_fd76485a_7423713.png "屏幕截图.png")
+
+ ![日志](https://images.gitee.com/uploads/images/2020/0804/234936_8a692b39_7423713.png "屏幕截图.png")
 
  # 感谢
 
