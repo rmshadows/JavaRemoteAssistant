@@ -2,7 +2,7 @@
 
  - 开源、免费的远程协助工具TightVNC是个很棒的选择，但远程协助受控方一般是电脑小白，搭建TightVNC Server可能对他们来说有点困难。于是我写了这个JRA助手帮我更方便的协助小白朋友处理电脑的一些小问题。
 
- #### 连接过程：
+ ## 连接过程(!重!点!)：
 
        * 控制方：向对方发送JRA压缩包。搭建内网穿透，打开VNC_Viewer监听模式，告诉小白 **远程地址** ，等待逆向连接。
 
@@ -42,27 +42,37 @@
 
  # 截屏 
 
- ![main](https://images.gitee.com/uploads/images/2020/0729/233054_b5721a6a_7423713.png "屏幕截图.png")
+ ![主界面](https://images.gitee.com/uploads/images/2020/0729/233054_b5721a6a_7423713.png "屏幕截图.png")
 
- ![systray](https://images.gitee.com/uploads/images/2020/0804/234445_f0f3b8df_7423713.png "屏幕截图.png")
+ ![系统托盘](https://images.gitee.com/uploads/images/2020/0804/234445_f0f3b8df_7423713.png "屏幕截图.png")
 
- ![it works！](https://images.gitee.com/uploads/images/2020/0730/100116_eb6e316d_7423713.png "屏幕截图.png")
+ ![控制演示](https://images.gitee.com/uploads/images/2020/0730/100116_eb6e316d_7423713.png "屏幕截图.png")
 
- ![UAC](https://images.gitee.com/uploads/images/2020/0730/100034_18b32f14_7423713.png "屏幕截图.png")
+ ![处理UAC](https://images.gitee.com/uploads/images/2020/0730/100034_18b32f14_7423713.png "屏幕截图.png")
 
- ![Connect](https://images.gitee.com/uploads/images/2020/0730/095952_99a23603_7423713.png "屏幕截图.png")
+ ![指定远程主机](https://images.gitee.com/uploads/images/2020/0730/095952_99a23603_7423713.png "屏幕截图.png")
 
- ![输入图片说明](https://images.gitee.com/uploads/images/2020/0729/233126_e2baf58d_7423713.png "屏幕截图.png")
+ ![屏幕键盘](https://images.gitee.com/uploads/images/2020/0729/233126_e2baf58d_7423713.png "屏幕截图.png")
 
- ![ahk](https://images.gitee.com/uploads/images/2020/0729/233209_cc3a5e51_7423713.png "屏幕截图.png")
+ ![延时指示](https://images.gitee.com/uploads/images/2020/0729/233209_cc3a5e51_7423713.png "屏幕截图.png")
 
  ![tightvnc](https://images.gitee.com/uploads/images/2020/0729/233338_b7c4ea18_7423713.png "屏幕截图.png")
 
- ![ctrl](https://images.gitee.com/uploads/images/2020/0729/233402_1190aa4d_7423713.png "屏幕截图.png")
+ ![锁定的Ctrl](https://images.gitee.com/uploads/images/2020/0729/233402_1190aa4d_7423713.png "屏幕截图.png")
 
- ![package](https://images.gitee.com/uploads/images/2020/0729/235415_fd76485a_7423713.png "屏幕截图.png")
+ ![Maven打包](https://images.gitee.com/uploads/images/2020/0729/235415_fd76485a_7423713.png "屏幕截图.png")
 
- ![日志](https://images.gitee.com/uploads/images/2020/0804/234936_8a692b39_7423713.png "屏幕截图.png")
+ ![日志输出](https://images.gitee.com/uploads/images/2020/0804/234936_8a692b39_7423713.png "屏幕截图.png")
+
+ # 关于
+
+ 你可能会遇到这个情况：
+
+ ![exception](https://images.gitee.com/uploads/images/2020/0805/140844_983c4b35_7423713.png "屏幕截图.png")
+
+ 这个问题是因为系统中的Java 8引起的，具体解决参见这里 ——> https://openjfx.io/openjfx-docs/#IDE-Eclipse  
+
+ 说难听点，只要解除Java 8的Path就OK了。还有另一个解决办法是，不通过Maven插件，自己手动编译打包(文件体积会大一点)。
 
  # 感谢
 
