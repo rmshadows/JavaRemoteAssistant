@@ -35,7 +35,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.robot.Robot;
 
 public class PrimaryController implements Initializable {
-	private static String defaultRemoteHostAddress = "8.8.8.8:6666";
+	private static String defaultRemoteHostAddress = "cn-zj-dx-2.sakurafrp.com:42740";
 	// 用于停止执行VNC服务的启动
 	private final static String EXIT_CODE = "ERROR";
 	private static Robot robot = new Robot();
@@ -95,7 +95,6 @@ public class PrimaryController implements Initializable {
 		// 让鼠标的位置不再默认左上角
 		vb.setOnMousePressed((MouseEvent event) -> {
 			event.consume();
-//			System.out.println("Pressed!");
 			xOffset = event.getSceneX();
 			yOffset = event.getSceneY();
 //			xOffset = event.getX();
@@ -105,7 +104,6 @@ public class PrimaryController implements Initializable {
 		vb.setOnMouseDragged((MouseEvent event) -> {
 			event.consume();
 			App.setStageX(event.getScreenX() - xOffset);
-//			System.out.println("Draged!");
 			if (event.getScreenY() - yOffset < 0) {
 				App.setStageY(0);
 			} else {
@@ -159,7 +157,8 @@ public class PrimaryController implements Initializable {
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			System.out.println(String.format("[%s]显示桌面：%s", 
+					LocalDateTime.now().toString().replace("T", "|"),e.toString()));
 		}
 		App.showFront();
 		System.out.println(String.format("[%s]显示桌面。", LocalDateTime.now().toString().replace("T", "|")));
@@ -312,7 +311,8 @@ public class PrimaryController implements Initializable {
 			try {
 				getIPaddr();
 			} catch (SocketException e1) {
-				e1.printStackTrace();
+				System.out.println(String.format("[%s]获取IP出错：%s", 
+						LocalDateTime.now().toString().replace("T", "|"),e1.toString()));
 			}
 		}
 		App.start_up = true;
@@ -793,6 +793,8 @@ public class PrimaryController implements Initializable {
 					}
 					// 再次检查
 					try {
+						System.out.println(String.format("[%s]再次检查。", 
+								LocalDateTime.now().toString().replace("T", "|")));
 						cmd_run = "tasklist";
 						cmd = Runtime.getRuntime().exec(cmd_run);
 						BufferedReader readTask = new BufferedReader(
@@ -802,7 +804,8 @@ public class PrimaryController implements Initializable {
 						// 遍历tasklist
 						while ((line = readTask.readLine()) != null) {
 							Tasks.add(line);
-							System.out.println(line);
+							System.out.println(String.format("[%s] %s", 
+									LocalDateTime.now().toString().replace("T", "|"),line));
 						}
 						for (String task : Tasks) { // 也可以改写 for(int i=0;i<list.size();i++) 这种形式
 							if (task.contains("start_server.exe")) {
@@ -951,7 +954,7 @@ public class PrimaryController implements Initializable {
 			// 遍历service
 			while ((line = readServ.readLine()) != null) {
 				Services.add(line);
-				System.out.println(String.format("[%s]r: %s", LocalDateTime.now().toString().replace("T", "|"), line));
+				System.out.println(String.format("[%s]read: %s", LocalDateTime.now().toString().replace("T", "|"), line));
 			}
 			for (String task : Services) { // 也可以改写 for(int i=0;i<list.size();i++) 这种形式
 				if (task.contains("tvnserver")) {
@@ -989,7 +992,7 @@ public class PrimaryController implements Initializable {
 			// 遍历tasklist
 			while ((line = readTask.readLine()) != null) {
 				Tasks.add(line);
-				System.out.println(String.format("[%s]r: %s", LocalDateTime.now().toString().replace("T", "|"), line));
+				System.out.println(String.format("[%s]read: %s", LocalDateTime.now().toString().replace("T", "|"), line));
 			}
 			for (String task : Tasks) { // 也可以改写 for(int i=0;i<list.size();i++) 这种形式
 				if (task.contains("start_server.exe")) {
@@ -1035,7 +1038,8 @@ public class PrimaryController implements Initializable {
 			});
 			input = EXIT_CODE;
 		}
-		System.out.println(input);
+		System.out.println(String.format("[%s]获取到用户自定义远程主机参数：%s", 
+				LocalDateTime.now().toString().replace("T", "|"),input));
 		if (input.equals(EXIT_CODE)) {
 			return EXIT_CODE;
 		} else if (input.equals("")) {
@@ -1095,6 +1099,158 @@ public class PrimaryController implements Initializable {
 	 * 倒计时执行auto hot key 2.0 注意：中途无法取消！
 	 * 
 	 * @author Ryan Yim
+	 *
+	 */
+	private final class AHK_Delay_Util extends Thread {
+		String src = "";
+		int Sec_src;
+		String filename;
+
+		private AHK_Delay_Util(String filename) {
+			src = info.getText();
+			Sec_src = DelaySecond;
+			this.filename = filename;
+			setDaemon(true);
+		}
+
+		@Override
+		public void run() {
+			System.out.println(String.format("[%s]进入AHK_Delay_Util倒计时：%d 秒",
+					LocalDateTime.now().toString().replace("T", "|"), DelaySecond));
+			while (true) {
+				Platform.runLater(new Runnable() {
+					@Override
+					public void run() {
+						// 更新JavaFX的主线程的代码放在此处
+						String text = String.format("距离执行还有 %d 秒", DelaySecond);
+						info.setText(text);
+						System.out.println(String.format("[%s]距离Auto Hot Key脚本执行还有 %d 秒。",
+								LocalDateTime.now().toString().replace("T", "|"), DelaySecond));
+					}
+				});
+				if (DelaySecond == 0) {
+					System.out.println(String.format("[%s]AHK_Delay_Util：捕获计时器讯号（0），" + "执行Auto Hot Key脚本中……",
+							LocalDateTime.now().toString().replace("T", "|")));
+					Platform.runLater(new Runnable() {
+						@Override
+						public void run() {
+							// 更新JavaFX的主线程的代码放在此处
+							info.setText(src);
+							System.out.println(String.format("[%s]AHK_Delay_Util：重置JavaFX标签。",
+							LocalDateTime.now().toString().replace("T", "|")));
+						}
+					});
+					try {
+						Process cmd;
+						String cmd_run = ".\\bin\\AHK.exe .\\ahks\\" + filename + ".ahk";
+						cmd = Runtime.getRuntime().exec(cmd_run);
+						System.out.println(String.format("[%s]%s.ahk执行结果：%d",
+								LocalDateTime.now().toString().replace("T", "|"), filename, cmd.waitFor()));
+					} catch (Exception e) {
+						System.out.println(String.format("[%s]AHK_Delay_Util执行错误：%s",
+							LocalDateTime.now().toString().replace("T", "|"),e.toString()));
+					}
+					DelaySecond = Sec_src;
+					System.out.println(String.format("[%s]====>>>>AHK_Delay_Util 执行完成<<<<====",
+							LocalDateTime.now().toString().replace("T", "|")));
+					return;
+				}
+				try {
+					DelaySecond -= 1;
+					sleep(1000); // 1秒更新一次显示
+//					System.out.println("Second-1");
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+					System.out.println(String.format("[%s]AHK_Delay_Util计时出现错误[退出]：%s",
+							LocalDateTime.now().toString().replace("T", "|"), e.toString()));
+					System.exit(1);
+				}
+			}
+		}
+	}
+	
+	/**
+	 * 输入法延时关断
+	 * @author Ryan Yim
+	 *
+	 */
+	private final class IM_Delay_Util extends Thread {
+		String src = "";
+		private IM_Delay_Util(int sec) {
+			src = info.getText();
+			DelaySecond = sec;
+			setDaemon(true);
+		}
+		@Override
+		public void run() {
+			System.out.println(String.format("[%s]进入Delay_Util倒计时：%d 秒",
+					LocalDateTime.now().toString().replace("T", "|"), DelaySecond));
+			while (true) {
+				Platform.runLater(new Runnable() {
+					@Override
+					public void run() {
+						// 更新JavaFX的主线程的代码放在此处
+						String text = String.format("距离执行还有 %d 秒", DelaySecond);
+						info.setText(text);
+						System.out.println(String.format("[%s]距离执行还有 %d 秒。",
+								LocalDateTime.now().toString().replace("T", "|"), DelaySecond));
+					}
+				});
+				if (DelaySecond == 0) {
+					System.out.println(String.format("[%s]Delay_Util：捕获计时器讯号（0）。",
+							LocalDateTime.now().toString().replace("T", "|")));
+					Platform.runLater(new Runnable() {
+						@Override
+						public void run() {
+							robot.keyPress(KeyCode.CONTROL);
+							robot.keyPress(KeyCode.SPACE);
+							robot.keyRelease(KeyCode.CONTROL);
+							robot.keyRelease(KeyCode.SPACE);
+							info.setText(src);
+							System.out.println(String.format("[%s]Delay_Util：重置JavaFX标签。",
+									LocalDateTime.now().toString().replace("T", "|"), DelaySecond));
+						}
+					});
+					System.out.println(String.format("[%s]====>>>>Delay_Util 执行完成<<<<====",
+							LocalDateTime.now().toString().replace("T", "|")));
+					return;
+				}
+				try {
+					DelaySecond -= 1;
+					sleep(1000); // 1秒更新一次显示
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+					System.out.println(String.format("[%s]Delay_Util出现错误[退出]：%s",
+							LocalDateTime.now().toString().replace("T", "|"), e.toString()));
+					System.exit(1);
+				}
+			}
+		}
+	}
+
+
+	/**
+	 * 返回Ctrl、Shift、Windows、Alt的锁定状态
+	 * 
+	 * @return
+	 */
+	public static boolean getCtrl() {
+		return isCtrlPressed;
+	}
+
+	public static boolean getShift() {
+		return isShiftPressed;
+	}
+
+	public static boolean getAlt() {
+		return isAltPressed;
+	}
+
+	public static boolean getWindows() {
+		return isWindowsPressed;
+	}
+}
+im
 	 *
 	 */
 	private final class AHK_Delay_Util extends Thread {
