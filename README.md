@@ -74,6 +74,20 @@
 
  说难听点，只要解除Java 8的Path就OK了。还有另一个解决办法是，不通过Maven插件，自己手动编译打包(文件体积会大一点)。
 
+ 你可能还会遇到杀毒软件报毒：
+
+ ![360-0](https://images.gitee.com/uploads/images/2020/0805/233320_7573cadc_7423713.png "屏幕截图.png")
+
+ ![360-1](https://images.gitee.com/uploads/images/2020/0805/233525_277e4ef4_7423713.png "屏幕截图.png")
+
+ 但是你大可以看一看这个人畜无害的源代码：
+ 
+ ![Launcher](https://images.gitee.com/uploads/images/2020/0805/232919_ec77c98a_7423713.png "屏幕截图.png")
+
+ 和[VirScan](https://www.virscan.org/language/en/)的杀毒情况：
+
+ ![virscan](https://images.gitee.com/uploads/images/2020/0805/233137_39850631_7423713.png "屏幕截图.png")
+
  # 感谢
 
  感谢[ **TightVNC** ](https://www.tightvnc.com/) 和 [ **TigerVNC** ](https://tigervnc.org/) 作者们的辛勤劳作，很棒的项目，特别是逆向连接简直妙极了哈哈哈哈哈哈。Windows这边我优先使用TightVNC，Linux平台我优先使用TigerVNC，都是很棒的项目，再次感谢！
