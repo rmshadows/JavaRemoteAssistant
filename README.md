@@ -74,7 +74,9 @@
 
  说难听点，只要解除Java 8的Path就OK了。还有另一个解决办法是，不通过Maven插件，自己手动编译打包(文件体积会大一点)。
 
- 你可能还会遇到杀毒软件报毒：
+ ~~你可能还会遇到360杀毒软件报毒~~【截止2020-08-06 - 360已将解除木马弹窗】：
+
+ ![QH360-WL](https://images.gitee.com/uploads/images/2020/0806/125001_dfc0d77b_7423713.png "屏幕截图.png")
 
  ![360-0](https://images.gitee.com/uploads/images/2020/0805/233320_7573cadc_7423713.png "屏幕截图.png")
 
