@@ -37,8 +37,8 @@ public class App extends Application {
 	@Override
 	public void start(Stage stage) throws IOException {
 		System.out.println("欢迎使用Java Remote Assistant远程协助助手。");
-		System.out.println("Ryan Yim -2020-08-03-");
-		System.out.println("版本：4.1");
+		System.out.println("Ryan Yim -2021-09-13-");
+		System.out.println("版本：4.2.0");
 		System.out.println("\n====>>>>正在初始化<<<<====");
 		sstage = stage;
 		scene = new Scene(loadFXML("primary"));

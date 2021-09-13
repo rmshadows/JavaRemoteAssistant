@@ -2,6 +2,9 @@ package application;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -15,6 +18,7 @@ import java.time.LocalDateTime;
 import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.Optional;
+import java.util.Properties;
 import java.util.ResourceBundle;
 
 import javafx.application.Platform;
@@ -35,7 +39,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.robot.Robot;
 
 public class PrimaryController implements Initializable {
-	private static String defaultRemoteHostAddress = "cn-zj-dx-2.sakurafrp.com:42740";
+	// 默认连接地址
+	private static String defaultRemoteHostAddress = "";
 	// 用于停止执行VNC服务的启动
 	private final static String EXIT_CODE = "ERROR";
 	private static Robot robot = new Robot();
@@ -86,6 +91,115 @@ public class PrimaryController implements Initializable {
 	private Button Keyboard;
 	@FXML
 	private Button About;
+	
+	/**
+	 * 初始化
+	 */
+	@Override
+	public void initialize(URL location, ResourceBundle resources) {
+		// 加载配置文件
+		Properties config = new Properties();
+		File conf_file = new File("jra.properties");
+		// 配置文件不存在就加载
+		if(!conf_file.exists()) {
+			try {
+				config.setProperty("DefaultIP", "Default IP to Connect");
+				config.store(new FileOutputStream(conf_file), "JRA Config File");
+			} catch (FileNotFoundException e1) {
+				e1.printStackTrace();
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
+		}else {
+			try {
+				config.load(new FileInputStream(conf_file));
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			defaultRemoteHostAddress = config.getProperty("DefaultIP");
+			System.out.println("获取配置信息：");
+			System.out.println("默认连接地址："+defaultRemoteHostAddress);
+		}
+		/**
+		 * 在不是Windows的系统上将发出警告
+		 */
+		if (File.separator.equals("/")) {
+//			System.out.println(File.separator);
+			Alert quit = new Alert(AlertType.ERROR, "请在Windows上使用Java Remote Assistant！");
+			System.out
+					.println(String.format("[%s]错误：不是一个Windows系统！", LocalDateTime.now().toString().replace("T", "|")));
+			quit.show();
+		}
+
+		vb.getStyleClass().add("bgm");
+		info.getStyleClass().add("font");
+		if (!App.start_up) {
+			try {
+				getIPaddr();
+			} catch (SocketException e1) {
+				System.out.println(String.format("[%s]获取IP出错：%s", 
+						LocalDateTime.now().toString().replace("T", "|"),e1.toString()));
+			}
+		}
+		App.start_up = true;
+		
+		/**
+		 * 切换桌面的方法
+		 */
+		DesktopsRolling.setOnMouseClicked(new EventHandler<MouseEvent>() {
+			@Override
+			public void handle(MouseEvent event) {
+				if (event.getButton() == MouseButton.PRIMARY) {
+					System.out.println(String.format("[%s]下一个桌面。", LocalDateTime.now().toString().replace("T", "|")));
+					try {
+						Thread.sleep(500);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+					robot.keyPress(KeyCode.CONTROL);
+					robot.keyPress(KeyCode.WINDOWS);
+					robot.keyPress(KeyCode.RIGHT);
+					robot.keyRelease(KeyCode.CONTROL);
+					robot.keyRelease(KeyCode.WINDOWS);
+					robot.keyRelease(KeyCode.RIGHT);
+					App.showFront();
+				} else if (event.getButton() == MouseButton.SECONDARY) {
+					System.out.println(String.format("[%s]上一个桌面。", LocalDateTime.now().toString().replace("T", "|")));
+					try {
+						Thread.sleep(500);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+					robot.keyPress(KeyCode.CONTROL);
+					robot.keyPress(KeyCode.WINDOWS);
+					robot.keyPress(KeyCode.LEFT);
+					robot.keyRelease(KeyCode.CONTROL);
+					robot.keyRelease(KeyCode.WINDOWS);
+					robot.keyRelease(KeyCode.LEFT);
+					App.showFront();
+				} else if (event.getButton() == MouseButton.MIDDLE) {
+					System.out.println(String.format("[%s]新建桌面。", LocalDateTime.now().toString().replace("T", "|")));
+					try {
+						Thread.sleep(500);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+					robot.keyPress(KeyCode.CONTROL);
+					robot.keyPress(KeyCode.WINDOWS);
+					robot.keyPress(KeyCode.D);
+					robot.keyRelease(KeyCode.CONTROL);
+					robot.keyRelease(KeyCode.WINDOWS);
+					robot.keyRelease(KeyCode.D);
+					App.showFront();
+				} else {
+					System.out.println(
+							String.format("[%s]切换桌面错误：未定义该鼠标按键。", LocalDateTime.now().toString().replace("T", "|")));
+				}
+			}
+		});
+	}
 
 	/**
 	 * 移动主窗口
@@ -287,89 +401,6 @@ public class PrimaryController implements Initializable {
 		} else {
 			App.setRoot("secondary");
 		}
-	}
-	
-	/**
-	 * 初始化
-	 */
-	@Override
-	public void initialize(URL location, ResourceBundle resources) {
-		/**
-		 * 在不是Windows的系统上将发出警告
-		 */
-		if (File.separator.equals("/")) {
-			System.out.println(File.separator);
-			Alert quit = new Alert(AlertType.ERROR, "请在Windows上使用Java Remote Assistant！");
-			System.out
-					.println(String.format("[%s]错误：不是一个Windows系统！", LocalDateTime.now().toString().replace("T", "|")));
-			quit.show();
-		}
-
-		vb.getStyleClass().add("bgm");
-		info.getStyleClass().add("font");
-		if (!App.start_up) {
-			try {
-				getIPaddr();
-			} catch (SocketException e1) {
-				System.out.println(String.format("[%s]获取IP出错：%s", 
-						LocalDateTime.now().toString().replace("T", "|"),e1.toString()));
-			}
-		}
-		App.start_up = true;
-		/**
-		 * 切换桌面的方法
-		 */
-		DesktopsRolling.setOnMouseClicked(new EventHandler<MouseEvent>() {
-			@Override
-			public void handle(MouseEvent event) {
-				if (event.getButton() == MouseButton.PRIMARY) {
-					System.out.println(String.format("[%s]下一个桌面。", LocalDateTime.now().toString().replace("T", "|")));
-					try {
-						Thread.sleep(500);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-					robot.keyPress(KeyCode.CONTROL);
-					robot.keyPress(KeyCode.WINDOWS);
-					robot.keyPress(KeyCode.RIGHT);
-					robot.keyRelease(KeyCode.CONTROL);
-					robot.keyRelease(KeyCode.WINDOWS);
-					robot.keyRelease(KeyCode.RIGHT);
-					App.showFront();
-				} else if (event.getButton() == MouseButton.SECONDARY) {
-					System.out.println(String.format("[%s]上一个桌面。", LocalDateTime.now().toString().replace("T", "|")));
-					try {
-						Thread.sleep(500);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-					robot.keyPress(KeyCode.CONTROL);
-					robot.keyPress(KeyCode.WINDOWS);
-					robot.keyPress(KeyCode.LEFT);
-					robot.keyRelease(KeyCode.CONTROL);
-					robot.keyRelease(KeyCode.WINDOWS);
-					robot.keyRelease(KeyCode.LEFT);
-					App.showFront();
-				} else if (event.getButton() == MouseButton.MIDDLE) {
-					System.out.println(String.format("[%s]新建桌面。", LocalDateTime.now().toString().replace("T", "|")));
-					try {
-						Thread.sleep(500);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-					robot.keyPress(KeyCode.CONTROL);
-					robot.keyPress(KeyCode.WINDOWS);
-					robot.keyPress(KeyCode.D);
-					robot.keyRelease(KeyCode.CONTROL);
-					robot.keyRelease(KeyCode.WINDOWS);
-					robot.keyRelease(KeyCode.D);
-					App.showFront();
-				} else {
-					System.out.println(
-							String.format("[%s]切换桌面错误：未定义该鼠标按键。", LocalDateTime.now().toString().replace("T", "|")));
-				}
-			}
-		});
 	}
 	
 	/**
@@ -1218,159 +1249,6 @@ public class PrimaryController implements Initializable {
 				try {
 					DelaySecond -= 1;
 					sleep(1000); // 1秒更新一次显示
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-					System.out.println(String.format("[%s]Delay_Util出现错误[退出]：%s",
-							LocalDateTime.now().toString().replace("T", "|"), e.toString()));
-					System.exit(1);
-				}
-			}
-		}
-	}
-
-
-	/**
-	 * 返回Ctrl、Shift、Windows、Alt的锁定状态
-	 * 
-	 * @return
-	 */
-	public static boolean getCtrl() {
-		return isCtrlPressed;
-	}
-
-	public static boolean getShift() {
-		return isShiftPressed;
-	}
-
-	public static boolean getAlt() {
-		return isAltPressed;
-	}
-
-	public static boolean getWindows() {
-		return isWindowsPressed;
-	}
-}
-im
-	 *
-	 */
-	private final class AHK_Delay_Util extends Thread {
-		String src = "";
-		int Sec_src;
-		String filename;
-
-		private AHK_Delay_Util(String filename) {
-			src = info.getText();
-			Sec_src = DelaySecond;
-			this.filename = filename;
-			setDaemon(true);
-		}
-
-		@Override
-		public void run() {
-			System.out.println(String.format("[%s]进入AHK_Delay_Util倒计时：%d 秒",
-					LocalDateTime.now().toString().replace("T", "|"), DelaySecond));
-			while (true) {
-				Platform.runLater(new Runnable() {
-					@Override
-					public void run() {
-						// 更新JavaFX的主线程的代码放在此处
-						String text = String.format("距离执行还有 %d 秒", DelaySecond);
-						info.setText(text);
-						System.out.println(String.format("[%s]距离Auto Hot Key脚本执行还有 %d 秒。",
-								LocalDateTime.now().toString().replace("T", "|"), DelaySecond));
-					}
-				});
-				if (DelaySecond == 0) {
-					System.out.println(String.format("[%s]AHK_Delay_Util：捕获计时器讯号（0），" + "执行Auto Hot Key脚本中……",
-							LocalDateTime.now().toString().replace("T", "|")));
-					Platform.runLater(new Runnable() {
-						@Override
-						public void run() {
-							// 更新JavaFX的主线程的代码放在此处
-							info.setText(src);
-							System.out.println(String.format("[%s]AHK_Delay_Util：重置JavaFX标签。",
-							LocalDateTime.now().toString().replace("T", "|")));
-						}
-					});
-					try {
-						Process cmd;
-						String cmd_run = ".\\bin\\AHK.exe .\\ahks\\" + filename + ".ahk";
-						cmd = Runtime.getRuntime().exec(cmd_run);
-						System.out.println(String.format("[%s]%s.ahk执行结果：%d",
-								LocalDateTime.now().toString().replace("T", "|"), filename, cmd.waitFor()));
-					} catch (Exception e) {
-						System.out.println(String.format("[%s]AHK_Delay_Util执行错误：%s",
-							LocalDateTime.now().toString().replace("T", "|"),e.toString()));
-					}
-					DelaySecond = Sec_src;
-					System.out.println(String.format("[%s]====>>>>AHK_Delay_Util 执行完成<<<<====",
-							LocalDateTime.now().toString().replace("T", "|")));
-					return;
-				}
-				try {
-					DelaySecond -= 1;
-					sleep(1000); // 1秒更新一次显示
-//					System.out.println("Second-1");
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-					System.out.println(String.format("[%s]AHK_Delay_Util计时出现错误[退出]：%s",
-							LocalDateTime.now().toString().replace("T", "|"), e.toString()));
-					System.exit(1);
-				}
-			}
-		}
-	}
-	
-	/**
-	 * 输入法延时关断
-	 * @author Ryan Yim
-	 *
-	 */
-	private final class IM_Delay_Util extends Thread {
-		String src = "";
-		private IM_Delay_Util(int sec) {
-			src = info.getText();
-			DelaySecond = sec;
-			setDaemon(true);
-		}
-		@Override
-		public void run() {
-			System.out.println(String.format("[%s]进入Delay_Util倒计时：%d 秒",
-					LocalDateTime.now().toString().replace("T", "|"), DelaySecond));
-			while (true) {
-				Platform.runLater(new Runnable() {
-					@Override
-					public void run() {
-						// 更新JavaFX的主线程的代码放在此处
-						String text = String.format("距离执行还有 %d 秒", DelaySecond);
-						info.setText(text);
-						System.out.println(String.format("[%s]距离执行还有 %d 秒。",
-								LocalDateTime.now().toString().replace("T", "|"), DelaySecond));
-					}
-				});
-				if (DelaySecond == 0) {
-					System.out.println(String.format("[%s]Delay_Util：捕获计时器讯号（0）。",
-							LocalDateTime.now().toString().replace("T", "|")));
-					Platform.runLater(new Runnable() {
-						@Override
-						public void run() {
-							robot.keyPress(KeyCode.CONTROL);
-							robot.keyPress(KeyCode.SPACE);
-							robot.keyRelease(KeyCode.CONTROL);
-							robot.keyRelease(KeyCode.SPACE);
-							info.setText(src);
-							System.out.println(String.format("[%s]Delay_Util：重置JavaFX标签。",
-									LocalDateTime.now().toString().replace("T", "|"), DelaySecond));
-						}
-					});
-					System.out.println(String.format("[%s]====>>>>Delay_Util 执行完成<<<<====",
-							LocalDateTime.now().toString().replace("T", "|")));
-					return;
-				}
-				try {
-					DelaySecond -= 1;
-					sleep(1000); // 1秒更新一次显示
-//					System.out.println("Second-1");
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 					System.out.println(String.format("[%s]Delay_Util出现错误[退出]：%s",
