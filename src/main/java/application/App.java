@@ -33,12 +33,13 @@ public class App extends Application {
 	private static Scene scene;
 	private static Robot r;
 	public static boolean start_up = false;
+	public static String version = "4.2.0";
 
 	@Override
 	public void start(Stage stage) throws IOException {
 		System.out.println("欢迎使用Java Remote Assistant远程协助助手。");
 		System.out.println("Ryan Yim -2021-09-13-");
-		System.out.println("版本：4.2.0");
+		System.out.println("版本："+version);
 		System.out.println("\n====>>>>正在初始化<<<<====");
 		sstage = stage;
 		scene = new Scene(loadFXML("primary"));
@@ -80,12 +81,12 @@ public class App extends Application {
 			try {
 				URL resource = this.getClass().getResource("icon.png"); // 获得图片路径
 				ImageIcon icon = new ImageIcon(resource);
-				TrayIcon trayIcon = new TrayIcon(icon.getImage(), "Java Remote Assistant v4.1");
+				TrayIcon trayIcon = new TrayIcon(icon.getImage(), "Java Remote Assistant v"+version);
 				trayIcon.setImageAutoSize(true);
 				SystemTray sysTray = SystemTray.getSystemTray();
 				try {
 					sysTray.add(trayIcon);
-					trayIcon.displayMessage("Woops...欢迎使用!\n        Java Remote Assistant v4.1", "单击系统托盘显示主界面~(=。=)~", TrayIcon.MessageType.INFO);
+					trayIcon.displayMessage("Woops...欢迎使用!\n        Java Remote Assistant ", "单击系统托盘显示主界面~(=。=)~", TrayIcon.MessageType.INFO);
 				} catch (AWTException e1) {
 					System.out.println(String.format("[%s]系统托盘AWTException：%s",
 							LocalDateTime.now().toString().replace("T", "|"),e1.toString()));

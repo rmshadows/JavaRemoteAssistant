@@ -37,7 +37,7 @@ public class SecondaryController implements Initializable{
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
 		// TODO 自动生成的方法存根
-		final String HELP = "功能：远程协助\n\n平台：Windows\n\n版本：4.1\n\n"
+		final String HELP = "功能：远程协助\n\n平台：Windows\n\n版本："+App.version+"\n\n"
 				+ "使用方式：\n打开软件后，请点击一下“加载远程桌面”按钮。"
 				+ "随后可能弹出UAC询问窗口“是否以管理员权限运行”，"
 				+ "请选择同意。可能还会弹出Windows防火墙询问窗口“是否允许连接网络”。"
