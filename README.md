@@ -102,6 +102,8 @@ Only work on Windows 10 (1903 and above) ！Windows 7 or x86(32bit) machine may 
 
 # 更新日志
 
+- 2022.01.21——4.2.5
+  - 尝试引入32位支持(TODO,可能烂尾哈哈哈哈哈)
 - 2021.09.13——4.2.0
   - 新增JNA配置文件
 - 2020.08.03——4.1.0
